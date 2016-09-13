@@ -7,13 +7,17 @@ import (
 )
 
 func (catalogApi *CatalogApi) Save(catalog *Catalog) error {
-	var catalogs []Catalog
-	if err := catalogApi.DbClient.Where("name = ?", catalog.Name).Find(&catalogs).Error; err != nil {
+	count := 0
+	if err := catalogApi.
+		DbClient.
+		Model(&Catalog{}).
+		Where("name = ?", catalog.Name).
+		Count(&count).Error; err != nil {
 		log.Errorf("get catalog error: %v", err)
 		return err
 	}
 
-	if len(catalogs) > 0 {
+	if count > 0 {
 		log.Warnf("catlog: %s already exist", catalog.Name)
 		return errors.New("already exist")
 	}
@@ -40,4 +44,22 @@ func (catalogApi *CatalogApi) Get(catalogId uint64) (Catalog, error) {
 
 func (catalogApi *CatalogApi) Delete(catalogId uint64) error {
 	return catalogApi.DbClient.Delete(&Catalog{ID: catalogId}).Error
+}
+
+func (catalogApi *CatalogApi) Update(catalog *Catalog) error {
+	count := 0
+	if err := catalogApi.DbClient.
+		Model(&Catalog{}).
+		Where("name = ? AND id != ? AND user_id = ?", catalog.Name, catalog.ID, catalog.UserId).
+		Count(&count).
+		Error; err != nil {
+		log.Errorf("get catalog error: %v", err)
+		return err
+	}
+
+	if count > 0 {
+		log.Warnf("catlog: %s already exist", catalog.Name)
+		return errors.New("already exist")
+	}
+	return catalogApi.DbClient.Save(catalog).Error
 }

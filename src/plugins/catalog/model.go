@@ -2,7 +2,7 @@ package catalog
 
 import (
 	"encoding/base64"
-	"errors"
+	//"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -33,14 +33,11 @@ func ImageHandle(request *http.Request) (string, error) {
 
 	icon, _, err := request.FormFile("icon")
 	if err != nil {
-		if buf, err = ioutil.ReadFile(ICON_DEFAULT); err != nil {
-			return "", err
-		}
 		return "", nil
 	} else {
-		if fileSize, ok := icon.(Size); !ok || fileSize.Size() > ICON_SIZE {
+		/*if fileSize, ok := icon.(Size); !ok || fileSize.Size() > ICON_SIZE {
 			return "", errors.New("invalid image")
-		}
+		}*/
 
 		buf, err = ioutil.ReadAll(icon)
 		if err != nil {
